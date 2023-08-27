@@ -82,13 +82,5 @@ while True:
 
 # serialize data
 message = pickle.dumps({"method" : f"{DISCONNECT_MESSAGE}"})
-# measure message size
-msg_len = len(message)
-# encode/serialize message length
-send_len = str(msg_len).encode(FORMAT)
-# pad length to HEADER size
-send_len += b' ' * (HEADER - len(send_len))
-# send length
-client.send(send_len)
-# send message
-client.send(message)
+send(message)
+

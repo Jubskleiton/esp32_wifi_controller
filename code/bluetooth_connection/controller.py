@@ -68,8 +68,9 @@ print(f"LISTENING up on {MAC_ADDRESS}")
 conn, addr = controller.accept()
 print(f"{addr} connected")
 print("initialing for " + str(addr))
-
+receive(conn)
 data = receive(conn)
+print(data)
 if data.get("nickname"):
     nickname = data.get("nickname")
     thread = threading.Thread(target=handle_received, args=(conn, addr, nickname))
