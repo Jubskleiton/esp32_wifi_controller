@@ -16,29 +16,30 @@ ADDR = (MAC_ADDRESS, CHANNEL)
 NICKNAME = "Raspberry"
 
 
-def send(data, head=HEADER):
+def send(data, conn, head=HEADER):
     # serialize data
     message = pickle.dumps(data)
     # measure message size
-    msg_len = int(len(message))
-    # encode/serialize message length
-    send_len = pickle.dumps(msg_len)
-    # pad length to HEADER size
-    send_len += b' ' * (head - len(send_len))
+    msg_len = len(message)
+    print(msg_len)
+    # convert message length to bytes
+    send_len = msg_len.to_bytes(head, byteorder='big')
     # send length
-    client.send(send_len)
+    conn.send(send_len)
     # send message
-    client.send(message)
+    conn.send(message)
 
-def receive(head=HEADER):
+def receive(conn, head=HEADER):
     # receive message length
-    msg_len = int(pickle.loads(client.recv(head)))
-    # veryfi connection message (effective None message)
+    send_len = conn.recv(head)
+    msg_len = int.from_bytes(send_len, byteorder='big')
+    # verify connection message (effectively None message)
     if msg_len:
         # receive message and deserialize
-        return pickle.loads(client.recv(msg_len))
+        return pickle.loads(conn.recv(msg_len))
     else:
         return {}
+
 
 def receive_data_thread_fun(head=HEADER):
     while True:

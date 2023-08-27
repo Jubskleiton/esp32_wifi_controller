@@ -39,27 +39,26 @@ def send(data, conn, head=HEADER):
     # serialize data
     message = pickle.dumps(data)
     # measure message size
-    msg_len = int(len(message))
+    msg_len = len(message)
     print(msg_len)
-    # encode/serialize message length
-    send_len = pickle.dumps(msg_len)
-    # pad length to HEADER size
-    send_len = send_len + (head - len(send_len)) * b' '
+    # convert message length to bytes
+    send_len = msg_len.to_bytes(head, byteorder='big')
     # send length
     conn.send(send_len)
     # send message
     conn.send(message)
 
-
 def receive(conn, head=HEADER):
     # receive message length
-    msg_len = int(pickle.loads(conn.recv(head)))
-    # veryfi connection message (effective None message)
+    send_len = conn.recv(head)
+    msg_len = int.from_bytes(send_len, byteorder='big')
+    # verify connection message (effectively None message)
     if msg_len:
         # receive message and deserialize
         return pickle.loads(conn.recv(msg_len))
     else:
         return {}
+
 
 controller = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 controller.bind(ADDR)
