@@ -68,7 +68,7 @@ print(f"LISTENING up on {MAC_ADDRESS}")
 conn, addr = controller.accept()
 print(f"{addr} connected")
 print("initialing for " + str(addr))
-print(conn.recv(8).decode(FORMAT))
+
 data = receive(conn)
 if data.get("nickname"):
     nickname = data.get("nickname")

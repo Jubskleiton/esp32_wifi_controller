@@ -2,7 +2,7 @@ from random import randint
 import socket
 import pickle
 import threading
-
+from time import sleep
 
 CLIENT_ID = randint(0, 100)
 
@@ -63,9 +63,9 @@ print("reaching to connect")
 client.connect(ADDR)
 print("connected")
 print("initializing")
+sleep(1)
 receive_data_thread = threading.Thread(target=receive_data_thread_fun, daemon=True)
 receive_data_thread.start()
-
 
 send({"nickname": NICKNAME})
 
