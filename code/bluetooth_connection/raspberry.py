@@ -81,6 +81,5 @@ while True:
 # Sending the !DISCONNECT package to server
 
 # serialize data
-message = pickle.dumps({"method" : f"{DISCONNECT_MESSAGE}"})
-send(message)
+send({"method" : f"{DISCONNECT_MESSAGE}"})
 
