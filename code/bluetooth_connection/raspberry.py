@@ -16,7 +16,7 @@ ADDR = (MAC_ADDRESS, CHANNEL)
 NICKNAME = "Raspberry"
 
 
-def send(data, conn, head=HEADER):
+def send(data, head=HEADER):
     # serialize data
     message = pickle.dumps(data)
     # measure message size
@@ -25,18 +25,18 @@ def send(data, conn, head=HEADER):
     # convert message length to bytes
     send_len = msg_len.to_bytes(head, byteorder='big')
     # send length
-    conn.send(send_len)
+    client.send(send_len)
     # send message
-    conn.send(message)
+    client.send(message)
 
-def receive(conn, head=HEADER):
+def receive(head=HEADER):
     # receive message length
-    send_len = conn.recv(head)
+    send_len = client.recv(head)
     msg_len = int.from_bytes(send_len, byteorder='big')
     # verify connection message (effectively None message)
     if msg_len:
         # receive message and deserialize
-        return pickle.loads(conn.recv(msg_len))
+        return pickle.loads(client.recv(msg_len))
     else:
         return {}
 
