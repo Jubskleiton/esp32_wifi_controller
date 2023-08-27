@@ -79,7 +79,7 @@ def receive(conn, head=HEADER):
 
 def start():
     server.listen()
-    #subprocess.call(["C:/Users/enzog/Área de Trabalho/ngrok.exe", "tcp", "--domain=rd_2RivBLUuGwnWdFeVmAASbquCBmT", "{PORT}"])
+    print(server.getsockname())
     print(f"[LISTENING] server up on {IP}")
     while True:
         conn, addr = server.accept()
@@ -103,3 +103,4 @@ def start():
 print("Starting server")
 start()
 print(connected_list)
+server.close()
