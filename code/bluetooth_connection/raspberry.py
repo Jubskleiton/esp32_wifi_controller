@@ -20,9 +20,9 @@ def send(data, head=HEADER):
     # serialize data
     message = pickle.dumps(data)
     # measure message size
-    msg_len = len(message)
+    msg_len = int(len(message))
     # encode/serialize message length
-    send_len = str(msg_len).encode(FORMAT)
+    send_len = pickle.dumps(msg_len)
     # pad length to HEADER size
     send_len += b' ' * (head - len(send_len))
     # send length
@@ -32,11 +32,11 @@ def send(data, head=HEADER):
 
 def receive(head=HEADER):
     # receive message length
-    msg_len = client.recv(head).decode(FORMAT)
+    msg_len = int(pickle.loads(client.recv(head)))
     # veryfi connection message (effective None message)
     if msg_len:
         # receive message and deserialize
-        return pickle.loads(client.recv(int(msg_len)))
+        return pickle.loads(client.recv(msg_len))
     else:
         return {}
 
@@ -71,7 +71,7 @@ send({"nickname": NICKNAME})
 while True:
     if input("quit ? Y/n: ").upper() == "Y":
         break
-    if input("send log message ? Y/n").upper() == "Y":
+    if input("send log message ? Y/n: ").upper() == "Y":
         send({"method":"message", "text":input("text: ")})
     else:
         print("battery level func method")

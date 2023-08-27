@@ -1,7 +1,7 @@
 import socket
 import threading
 import pickle
-
+from time import sleep
 
 HEADER = 1024
 CHANNEL = 4 # 1 - 20
@@ -39,11 +39,12 @@ def send(data, conn, head=HEADER):
     # serialize data
     message = pickle.dumps(data)
     # measure message size
-    msg_len = len(message)
+    msg_len = int(len(message))
+    print(msg_len)
     # encode/serialize message length
-    send_len = str(msg_len).encode(FORMAT)
+    send_len = pickle.dumps(msg_len)
     # pad length to HEADER size
-    send_len += b' ' * (head - len(send_len))
+    send_len = send_len + (head - len(send_len)) * b' '
     # send length
     conn.send(send_len)
     # send message
@@ -52,11 +53,11 @@ def send(data, conn, head=HEADER):
 
 def receive(conn, head=HEADER):
     # receive message length
-    msg_len = conn.recv(head).decode(FORMAT)
+    msg_len = int(pickle.loads(conn.recv(head)))
     # veryfi connection message (effective None message)
     if msg_len:
         # receive message and deserialize
-        return pickle.loads(conn.recv(int(msg_len)))
+        return pickle.loads(conn.recv(msg_len))
     else:
         return {}
 
@@ -67,7 +68,8 @@ controller.listen()
 print(f"LISTENING up on {MAC_ADDRESS}")
 conn, addr = controller.accept()
 print(f"{addr} connected")
-print("initialing for " + addr)
+print("initialing for " + str(addr))
+print(conn.recv(8).decode(FORMAT))
 data = receive(conn)
 if data.get("nickname"):
     nickname = data.get("nickname")
@@ -82,7 +84,7 @@ else:
 while True:
     if input("quit ? Y/n: ").upper() == "Y":
         break
-    if input("send log message ? Y/n").upper() == "Y":
+    if input("send log message ? Y/n: ").upper() == "Y":
         send({"method":"message", "text":input("text: ")}, conn)
     else:
         print("rgb led method")
