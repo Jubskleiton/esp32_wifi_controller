@@ -1,7 +1,6 @@
 import socket
 import threading
 import pickle
-from time import sleep
 
 HEADER = 1024
 CHANNEL = 4 # 1 - 20
@@ -12,27 +11,16 @@ DISCONNECT_MESSAGE = "!DISCONNECT"
 
 
 def terminal_input():
-    pass
-
-def handle_received(conn, addr, nickname):
     while True:
-        data = receive(conn)
-        if data:
-            if data.get("method") == DISCONNECT_MESSAGE:
-                print(f"{nickname} Disconnecting")
-                conn.close()
-                controller.close()
+        method = input("1: Send log message\n2: Set RGB\3e: Exit\nWhat to do: ")
+        match  method:
+            case "1":
+                send({"method":"log", "log":input("log: ")}, conn)
+            case "2":
+                send({"method":"RGB", "R":input("R: "), "G":input("G: "), "B":input("B: ")}, conn)
+            case "e":
+                send({"method": DISCONNECT_MESSAGE}, conn)
                 exit()
-            else:
-                if data.get("method") == "message":
-                    print(f"[{nickname}] {data.get('text')}")
-                elif data.get("method") == "func":
-                    if data.get("func") == "battery level":
-                        print(f"{data.get('batlvl')}")
-                        # changing code based on power level
-                else:
-                    print(f"[{addr}] {data}")
-
 
 
 def send(data, conn, head=HEADER):
@@ -73,23 +61,33 @@ data = receive(conn)
 print(data)
 if data.get("nickname"):
     nickname = data.get("nickname")
-    thread = threading.Thread(target=handle_received, args=(conn, addr, nickname))
-    thread.start()
     print(f"{nickname} initialized")
 else:
     print("Error wrong method send on initialization")
     conn.close()
     exit()
 
-while True:
-    if input("quit ? Y/n: ").upper() == "Y":
-        break
-    if input("send log message ? Y/n: ").upper() == "Y":
-        send({"method":"message", "text":input("text: ")}, conn)
-    else:
-        print("rgb led method")
-        send({"method":"LED RGB", "LED Red":input("R: "), "LED Green":input("G: "), "LED Blue":input("B: ")}, conn)
+thread = threading.Thread(target=terminal_input, args=(), daemon=True)
+thread.start()
 
-send({"method":DISCONNECT_MESSAGE}, conn)
+while True:
+    data = receive(conn)
+    if data:
+        if data.get("method") == DISCONNECT_MESSAGE:
+            print(f"{nickname} Disconnected, stopping program")
+            break
+        else:
+            if data.get("method") == "log":
+                print(f"[{nickname}] {data.get('log')}")
+            elif data.get("method") == "func":
+                if data.get("func") == "battery level":
+                    print(f"{data.get('batlvl')}")
+                    # changing code based on power level
+            else:
+                print(f"[{nickname}:{conn}] {data}")
+
+
 conn.close()
+controller.close()
+print("exited")
 exit()
